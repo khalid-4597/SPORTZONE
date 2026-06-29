@@ -11,7 +11,7 @@ const SEEDED_KEY = 'sz_products_seeded';
 
 const CATEGORY_LABELS = {
   'kubadda-cagta': 'Kubadda Cagta',
-  'orinta': 'Orinta',
+  'orodka': 'orordka',
   'koleyga': 'Koleyga',
   'dharka': 'Dharka'
 };
