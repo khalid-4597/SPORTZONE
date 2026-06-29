@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SportZone — Admin Gal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a; color: #f0f0f0;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .login-box {
+      background: #1a1a1a; border: 1px solid #242424;
+      border-radius: 10px; padding: 2.5rem;
+      width: 100%; max-width: 380px;
+      text-align: center;
+    }
+    .logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900; font-size: 1.8rem;
+      color: #f0f0f0; margin-bottom: 0.25rem; display: block;
+    }
+    .logo span { color: #e8192c; }
+    .subtitle { font-size: 0.75rem; color: #666; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2rem; }
+    label {
+      display: flex; flex-direction: column; gap: 0.35rem;
+      text-align: left; font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase; color: #666;
+      margin-bottom: 1rem;
+    }
+    input {
+      background: #242424; border: 1px solid #333;
+      color: #f0f0f0; padding: 0.7rem 0.9rem;
+      border-radius: 4px; font-size: 0.92rem; font-family: 'Inter', sans-serif;
+      outline: none; transition: border-color 0.18s;
+    }
+    input:focus { border-color: #e8192c; }
+    .btn {
+      width: 100%; padding: 0.85rem;
+      background: #e8192c; border: none; border-radius: 4px;
+      color: #fff; font-weight: 700; font-size: 0.9rem;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; margin-top: 0.5rem;
+      transition: background 0.18s;
+    }
+    .btn:hover { background: #b5121f; }
+    .error {
+      background: rgba(232,25,44,0.12); border: 1px solid rgba(232,25,44,0.3);
+      color: #e8192c; font-size: 0.82rem; padding: 0.6rem;
+      border-radius: 4px; margin-top: 0.75rem; display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <span class="logo">SPORT<span>ZONE</span></span>
+    <p class="subtitle">Admin Dashboard</p>
+    <label>Password
+      <input type="password" id="pwd" placeholder="••••••••" />
+    </label>
+    <button class="btn" id="loginBtn">Gal</button>
+    <div class="error" id="err">Passwordka waa khalad. Isku day mar kale.</div>
+  </div>
+
+  <script>
+    // Default password: "admin123" — change via dashboard settings
+    const ADMIN_PWD_KEY = 'sz_admin_pwd';
+    const getStoredPwd = () => localStorage.getItem(ADMIN_PWD_KEY) || 'admin123';
+
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const val = document.getElementById('pwd').value;
+      if (val === getStoredPwd()) {
+        sessionStorage.setItem('sz_admin_auth', '1');
+        window.location.href = 'dashboard.html';
+      } else {
+        document.getElementById('err').style.display = 'block';
+      }
+    });
+
+    document.getElementById('pwd').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('loginBtn').click();
+    });
+
+    // If already authed, go straight in
+    if (sessionStorage.getItem('sz_admin_auth') === '1') {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SportZone — Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red: #e8192c; --white: #f0f0f0;
+      --g100: #1a1a1a; --g200: #242424; --g300: #333; --g500: #666; --g700: #999;
+      --green: #00a651; --green-dim: rgba(0,166,81,0.15);
+      --yellow: #f5a623; --yellow-dim: rgba(245,166,35,0.15);
+      --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.15);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a; color: var(--white); min-height: 100vh;
+    }
+    /* NAV */
+    .nav {
+      background: var(--g100); border-bottom: 1px solid var(--g200);
+      padding: 0 1.5rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.4rem; }
+    .logo span { color: var(--red); }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .badge-admin {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+      background: var(--red); color: #fff; padding: 2px 8px; border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .btn-logout {
+      background: none; border: 1px solid var(--g300); color: var(--g700);
+      padding: 0.35rem 0.85rem; border-radius: 4px; font-size: 0.8rem;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+    /* LAYOUT */
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card {
+      background: var(--g100); border: 1px solid var(--g200);
+      border-radius: 8px; padding: 1.1rem;
+    }
+    .stat-label { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--g500); margin-bottom: 0.35rem; }
+    .stat-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 2rem; color: var(--white); }
+    .stat-val.red { color: var(--red); }
+    .stat-val.green { color: var(--green); }
+
+    /* FILTER TABS */
+    .filter-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 0.4rem 1rem; border-radius: 100px;
+      border: 1px solid var(--g300); background: var(--g100);
+      color: var(--g700); font-size: 0.82rem; cursor: pointer;
+      transition: all 0.18s;
+    }
+    .tab-btn:hover { border-color: var(--g500); color: var(--white); }
+    .tab-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
+
+    /* ORDERS TABLE */
+    .orders-table { width: 100%; border-collapse: collapse; }
+    .orders-table th {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--g500);
+      text-align: left; padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--g200);
+    }
+    .orders-table td {
+      padding: 0.85rem 0.75rem; border-bottom: 1px solid var(--g200);
+      vertical-align: middle; font-size: 0.875rem;
+    }
+    .orders-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .order-ref { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.95rem; }
+    .customer-name { font-weight: 600; }
+    .customer-phone { font-size: 0.8rem; color: var(--g500); margin-top: 2px; }
+    .order-total { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1rem; }
+    .order-date { font-size: 0.78rem; color: var(--g500); }
+
+    /* STATUS BADGE */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 100px; white-space: nowrap;
+    }
+    .status-badge::before { content: '●'; font-size: 0.5rem; }
+    .status-sugaya {
+      background: var(--yellow-dim); color: var(--yellow);
+      border: 1px solid rgba(245,166,35,0.3);
+    }
+    .status-xaqiijisan {
+      background: var(--blue-dim); color: var(--blue);
+      border: 1px solid rgba(59,130,246,0.3);
+    }
+    .status-ladiro {
+      background: var(--green-dim); color: var(--green);
+      border: 1px solid rgba(0,166,81,0.3);
+    }
+    .status-quftay {
+      background: rgba(232,25,44,0.12); color: var(--red);
+      border: 1px solid rgba(232,25,44,0.3);
+    }
+
+    /* ACTION BUTTONS */
+    .actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .action-btn {
+      font-size: 0.72rem; font-weight: 700; padding: 0.3rem 0.7rem;
+      border-radius: 4px; cursor: pointer; border: none; transition: all 0.18s;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .btn-confirm-order { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+    .btn-confirm-order:hover { background: var(--blue); color: #fff; }
+    .btn-ship { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,166,81,0.3); }
+    .btn-ship:hover { background: var(--green); color: #fff; }
+    .btn-cancel { background: rgba(232,25,44,0.1); color: var(--red); border: 1px solid rgba(232,25,44,0.3); }
+    .btn-cancel:hover { background: var(--red); color: #fff; }
+    .btn-detail { background: var(--g200); color: var(--g700); border: 1px solid var(--g300); }
+    .btn-detail:hover { background: var(--g300); color: var(--white); }
+
+    /* ORDER DETAIL PANEL */
+    .detail-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50;
+      display: none; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .detail-panel {
+      background: var(--g100); border: 1px solid var(--g200);
+      border-radius: 10px; width: 100%; max-width: 500px;
+      max-height: 85vh; overflow-y: auto; padding: 1.75rem;
+      position: relative;
+    }
+    .detail-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: none; color: var(--g500); font-size: 1rem; cursor: pointer;
+    }
+    .detail-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700; font-size: 1.4rem; margin-bottom: 1.25rem;
+    }
+    .detail-section { margin-bottom: 1.25rem; }
+    .detail-section-label {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--g500); margin-bottom: 0.5rem;
+    }
+    .detail-row {
+      display: flex; justify-content: space-between;
+      font-size: 0.85rem; padding: 0.3rem 0;
+      border-bottom: 1px solid var(--g200);
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row .label { color: var(--g700); }
+    .detail-total { font-weight: 700; font-size: 1rem; color: var(--white); }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--g500); }
+    .empty-state div { font-size: 2rem; margin-bottom: 0.5rem; }
+
+    /* SETTINGS SECTION */
+    .settings-section {
+      margin-top: 2.5rem; background: var(--g100); border: 1px solid var(--g200);
+      border-radius: 10px; padding: 1.5rem;
+    }
+    .settings-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem;
+    }
+    .settings-row { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .settings-row label {
+      display: flex; flex-direction: column; gap: 0.3rem;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--g500); flex: 1; min-width: 180px;
+    }
+    .settings-row input {
+      background: var(--g200); border: 1px solid var(--g300);
+      color: var(--white); padding: 0.6rem 0.8rem;
+      border-radius: 4px; font-size: 0.88rem; font-family: 'Inter', sans-serif;
+      outline: none; transition: border-color 0.18s; width: 100%;
+    }
+    .settings-row input:focus { border-color: var(--red); }
+    .btn-save {
+      background: var(--g200); border: 1px solid var(--g300); color: var(--white);
+      padding: 0.6rem 1.25rem; border-radius: 4px; font-size: 0.82rem;
+      font-weight: 700; cursor: pointer; transition: all 0.18s; white-space: nowrap;
+    }
+    .btn-save:hover { background: var(--red); border-color: var(--red); }
+    .save-ok { font-size: 0.78rem; color: var(--green); display: none; margin-top: 0.3rem; }
+
+    @media (max-width: 640px) {
+      .orders-table th:nth-child(4), .orders-table td:nth-child(4) { display: none; }
+      .orders-table th:nth-child(5), .orders-table td:nth-child(5) { display: none; }
+    }
+
+    /* SECTION SWITCH */
+    .section-switch {
+      background: var(--g100); border-bottom: 1px solid var(--g200);
+    }
+    .section-switch-inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 1.5rem;
+      display: flex; gap: 0.25rem;
+    }
+    .switch-btn {
+      background: none; border: none; color: var(--g500);
+      padding: 0.85rem 1.1rem; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all 0.18s; font-family: 'Inter', sans-serif;
+    }
+    .switch-btn:hover { color: var(--white); }
+    .switch-btn.active { color: var(--white); border-bottom-color: var(--red); }
+
+    /* STORAGE GAUGE */
+    .storage-gauge {
+      background: var(--g100); border: 1px solid var(--g200);
+      border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+    }
+    .storage-gauge-top {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.78rem; color: var(--g700); margin-bottom: 0.5rem;
+    }
+    .storage-gauge-top span:last-child { font-weight: 700; color: var(--white); }
+    .storage-gauge-bar {
+      height: 6px; background: var(--g200); border-radius: 100px; overflow: hidden;
+    }
+    .storage-gauge-fill {
+      height: 100%; background: var(--green); width: 0%;
+      transition: width 0.3s, background 0.3s;
+    }
+    .storage-gauge-fill.warn { background: var(--yellow); }
+    .storage-gauge-fill.danger { background: var(--red); }
+    .storage-gauge-note { font-size: 0.72rem; color: var(--g500); margin-top: 0.5rem; line-height: 1.4; }
+
+    /* PRODUCTS TOOLBAR */
+    .products-toolbar {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .products-heading { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.5rem; }
+    .btn-add-product {
+      background: var(--red); border: none; color: #fff;
+      padding: 0.65rem 1.25rem; border-radius: 4px; font-size: 0.85rem;
+      font-weight: 700; cursor: pointer; transition: background 0.18s;
+    }
+    .btn-add-product:hover { background: #b5121f; }
+
+    /* ADMIN PRODUCTS GRID */
+    .admin-products-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .admin-product-card {
+      background: var(--g100); border: 1px solid var(--g200);
+      border-radius: 8px; overflow: hidden;
+    }
+    .admin-product-img {
+      width: 100%; aspect-ratio: 1.3; background: var(--g200);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; position: relative;
+    }
+    .admin-product-img img { width: 100%; height: 100%; object-fit: cover; }
+    .admin-product-img .placeholder-icon { font-size: 2.2rem; opacity: 0.4; }
+    .admin-product-body { padding: 0.85rem; }
+    .admin-product-cat {
+      font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--red); font-weight: 700; margin-bottom: 0.25rem;
+    }
+    .admin-product-name {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 1.05rem; margin-bottom: 0.4rem; line-height: 1.2;
+    }
+    .admin-product-price {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+      font-size: 1.15rem; margin-bottom: 0.75rem;
+    }
+    .admin-product-actions { display: flex; gap: 0.4rem; }
+    .admin-product-actions button {
+      flex: 1; font-size: 0.72rem; font-weight: 700; padding: 0.4rem;
+      border-radius: 4px; cursor: pointer; transition: all 0.18s;
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .btn-edit-product { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+    .btn-edit-product:hover { background: var(--blue); color: #fff; }
+    .btn-delete-product { background: rgba(232,25,44,0.1); color: var(--red); border: 1px solid rgba(232,25,44,0.3); }
+    .btn-delete-product:hover { background: var(--red); color: #fff; }
+
+    /* PRODUCT FORM MODAL */
+    .product-modal { max-width: 440px; }
+    #productForm { display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; }
+    .pf-label {
+      display: flex; flex-direction: column; gap: 0.4rem;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--g500);
+    }
+    .pf-label input, .pf-label select, .pf-label textarea {
+      background: var(--g200); border: 1px solid var(--g300);
+      color: var(--white); padding: 0.65rem 0.85rem;
+      border-radius: 4px; font-size: 0.9rem; font-family: 'Inter', sans-serif;
+      outline: none; transition: border-color 0.18s; resize: vertical;
+    }
+    .pf-label input:focus, .pf-label select:focus, .pf-label textarea:focus { border-color: var(--red); }
+
+    .image-drop {
+      background: var(--g200); border: 1.5px dashed var(--g300);
+      border-radius: 8px; min-height: 140px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 1rem; transition: border-color 0.18s;
+      overflow: hidden;
+    }
+    .image-drop:hover { border-color: var(--red); }
+    .image-drop img { width: 100%; max-height: 220px; object-fit: contain; }
+    #imageDropText { font-size: 0.8rem; color: var(--g500); line-height: 1.6; }
+    #imageDropText small { color: var(--g500); font-size: 0.68rem; }
+
+    .btn-remove-img {
+      background: none; border: 1px solid var(--g300); color: var(--g700);
+      padding: 0.45rem 0.8rem; border-radius: 4px; font-size: 0.75rem;
+      cursor: pointer; align-self: flex-start; transition: all 0.18s;
+    }
+    .btn-remove-img:hover { border-color: var(--red); color: var(--red); }
+
+    .pf-error {
+      background: rgba(232,25,44,0.1); border: 1px solid rgba(232,25,44,0.3);
+      color: var(--red); font-size: 0.8rem; padding: 0.6rem 0.8rem;
+      border-radius: 4px; display: none;
+    }
+
+    .empty-products { text-align: center; padding: 3rem 1rem; color: var(--g500); grid-column: 1/-1; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="logo">SPORT<span>ZONE</span></span>
+  <div class="nav-right">
+    <span class="badge-admin">Admin</span>
+    <button class="btn-logout" id="logoutBtn">Ka Bax</button>
+  </div>
+</nav>
+
+<div class="section-switch">
+  <div class="section-switch-inner">
+    <button class="switch-btn active" id="switchOrders" data-section="orders">📦 Dalabyada</button>
+    <button class="switch-btn" id="switchProducts" data-section="products">🛍️ Alaabta</button>
+  </div>
+</div>
+
+<div class="container" id="ordersSection">
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow"></div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-tabs">
+    <button class="tab-btn active" data-status="all">Dhamma</button>
+    <button class="tab-btn" data-status="Sugaya Xaqiijin">Sugaya Xaqiijin</button>
+    <button class="tab-btn" data-status="Xaqiijisan">Xaqiijisan</button>
+    <button class="tab-btn" data-status="La Diro">La Diro</button>
+    <button class="tab-btn" data-status="Quftay">Quftay</button>
+  </div>
+
+  <!-- TABLE -->
+  <div style="overflow-x:auto">
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>Ref</th>
+          <th>Macmiilka</th>
+          <th>Xaaladda</th>
+          <th>Lacagta</th>
+          <th>Taariikhda</th>
+          <th>Tallaabooyinka</th>
+        </tr>
+      </thead>
+      <tbody id="ordersBody"></tbody>
+    </table>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="settings-section">
+    <div class="settings-title">⚙️ Goobaha Admin</div>
+    <div class="settings-row">
+      <label>Numberka EVC+ Merchant
+        <input type="text" id="settingMerchant" placeholder="252xxxxxxxxx" />
+      </label>
+      <button class="btn-save" id="saveMerchant">Kaydi</button>
+    </div>
+    <div class="save-ok" id="merchantOk">✓ La keydsaday</div>
+
+    <div class="settings-row" style="margin-top:1rem">
+      <label>Password Cusub
+        <input type="password" id="settingPwd" placeholder="Password cusub" />
+      </label>
+      <button class="btn-save" id="savePwd">Kaydi</button>
+    </div>
+    <div class="save-ok" id="pwdOk">✓ La keydsaday</div>
+  </div>
+</div><!-- /ordersSection -->
+
+<!-- ══════════════════ PRODUCTS SECTION ══════════════════ -->
+<div class="container" id="productsSection" style="display:none">
+
+  <!-- STORAGE GAUGE -->
+  <div class="storage-gauge" id="storageGauge">
+    <div class="storage-gauge-top">
+      <span>Bakhaarka Sawirrada (Browser Storage)</span>
+      <span id="storageGaugeText">0%</span>
+    </div>
+    <div class="storage-gauge-bar"><div class="storage-gauge-fill" id="storageGaugeFill"></div></div>
+    <p class="storage-gauge-note">Sawirrada waxay ku kaydsamaan browser-kan oo kaliya. Haddii bakhaarku buuxsamo, ka tirtir sawirro aan loo baahnayn ama sawirro ka yaree.</p>
+  </div>
+
+  <div class="products-toolbar">
+    <h2 class="products-heading">Maamulidda Alaabta</h2>
+    <button class="btn-add-product" id="openAddProduct">+ Alaab Cusub Ku Dar</button>
+  </div>
+
+  <div class="filter-tabs" id="productCatTabs">
+    <button class="tab-btn active" data-pcat="all">Dhamma</button>
+    <button class="tab-btn" data-pcat="kubadda-cagta">Kubadda Cagta</button>
+    <button class="tab-btn" data-pcat="orinta">Orinta</button>
+    <button class="tab-btn" data-pcat="koleyga">Koleyga</button>
+    <button class="tab-btn" data-pcat="dharka">Dharka</button>
+  </div>
+
+  <div class="admin-products-grid" id="adminProductsGrid"></div>
+</div><!-- /productsSection -->
+
+<!-- PRODUCT FORM MODAL -->
+<div class="detail-overlay" id="productModalOverlay">
+  <div class="detail-panel product-modal">
+    <button class="detail-close" id="productModalClose">✕</button>
+    <div class="detail-title" id="productModalTitle">Alaab Cusub Ku Dar</div>
+
+    <form id="productForm">
+      <input type="hidden" id="pfId" />
+
+      <label class="pf-label">Sawirka Alaabta
+        <div class="image-drop" id="imageDrop">
+          <img id="imagePreview" style="display:none" />
+          <span id="imageDropText">📷 Dhagso si aad sawir u soo gelliso<br/><small>JPG/PNG — waa la yareynayaa si ay si fudud u keydsamaan</small></span>
+        </div>
+        <input type="file" id="pfImageInput" accept="image/*" style="display:none" />
+      </label>
+      <button type="button" class="btn-remove-img" id="removeImageBtn" style="display:none">Ka Saar Sawirka</button>
+
+      <label class="pf-label">Magaca Alaabta
+        <input type="text" id="pfName" placeholder="Tusaale: Pro Sprint Boot" required />
+      </label>
+
+      <label class="pf-label">Qaybta
+        <select id="pfCategory" required>
+          <option value="kubadda-cagta">Kubadda Cagta</option>
+          <option value="orinta">Orinta</option>
+          <option value="koleyga">Koleyga</option>
+          <option value="dharka">Dharka</option>
+        </select>
+      </label>
+
+      <label class="pf-label">Qiimaha (USD)
+        <input type="number" id="pfPrice" min="0" step="0.01" placeholder="45.00" required />
+      </label>
+
+      <label class="pf-label">Sharaxaad
+        <textarea id="pfDescription" rows="3" placeholder="Sharaxaad gaaban oo ku saabsan alaabta..."></textarea>
+      </label>
+
+      <div class="pf-error" id="pfError"></div>
+
+      <button type="submit" class="btn-primary full" id="pfSubmitBtn">Alaabta Kaydi</button>
+    </form>
+  </div>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-panel">
+    <button class="detail-close" id="detailClose">✕</button>
+    <div class="detail-title" id="detailTitle">Faahfaahinta Dalabka</div>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<script src="../js/products.js"></script>
+<script>
+  // ── AUTH CHECK ──────────────────────────────────────────────────
+  if (sessionStorage.getItem('sz_admin_auth') !== '1') {
+    window.location.href = 'login.html';
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem('sz_admin_auth');
+    window.location.href = 'login.html';
+  });
+
+  // ── DATA ───────────────────────────────────────────────────────
+  const getOrders = () => JSON.parse(localStorage.getItem('sz_orders') || '[]');
+  const saveOrders = orders => localStorage.setItem('sz_orders', JSON.stringify(orders));
+
+  const STATUS_MAP = {
+    'Sugaya Xaqiijin': 'status-sugaya',
+    'Xaqiijisan':       'status-xaqiijisan',
+    'La Diro':          'status-ladiro',
+    'Quftay':           'status-quftay'
+  };
+
+  const fmtDate = iso => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('so-SO', { day: '2-digit', month: 'short' })
+      + ' ' + d.toLocaleTimeString('so-SO', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  let currentFilter = 'all';
+
+  // ── STATS ──────────────────────────────────────────────────────
+  function renderStats() {
+    const orders = getOrders();
+    const total = orders.reduce((s, o) => s + o.total, 0);
+    const pending = orders.filter(o => o.status === 'Sugaya Xaqiijin').length;
+    const shipped = orders.filter(o => o.status === 'La Diro').length;
+
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-label">Dalabyo Dhamma</div>
+        <div class="stat-val">${orders.length}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Sugaya Xaqiijin</div>
+        <div class="stat-val red">${pending}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">La Diro</div>
+        <div class="stat-val green">${shipped}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Wadarta Dakhliga</div>
+        <div class="stat-val">$${total.toFixed(2)}</div>
+      </div>
+    `;
+  }
+
+  // ── ORDERS TABLE ───────────────────────────────────────────────
+  function renderOrders() {
+    const all = getOrders();
+    const orders = currentFilter === 'all' ? all : all.filter(o => o.status === currentFilter);
+    const tbody = document.getElementById('ordersBody');
+
+    if (orders.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div>📦</div>Wax dalbo ah ma jiraan.</div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = orders.map(order => {
+      const badgeClass = STATUS_MAP[order.status] || '';
+      let actions = '';
+
+      if (order.status === 'Sugaya Xaqiijin') {
+        actions += `<button class="action-btn btn-confirm-order" data-ref="${order.ref}" data-action="xaqiiji">✓ Xaqiiji</button>`;
+        actions += `<button class="action-btn btn-cancel" data-ref="${order.ref}" data-action="quftay">✕ Quus</button>`;
+      }
+      if (order.status === 'Xaqiijisan') {
+        actions += `<button class="action-btn btn-ship" data-ref="${order.ref}" data-action="ladiro">🚚 Dir</button>`;
+        actions += `<button class="action-btn btn-cancel" data-ref="${order.ref}" data-action="quftay">✕ Quus</button>`;
+      }
+      actions += `<button class="action-btn btn-detail" data-ref="${order.ref}" data-action="detail">Faah</button>`;
+
+      return `
+        <tr>
+          <td><span class="order-ref">${order.ref}</span></td>
+          <td>
+            <div class="customer-name">${order.customer.name}</div>
+            <div class="customer-phone">${order.customer.phone}</div>
+          </td>
+          <td><span class="status-badge ${badgeClass}">${order.status}</span></td>
+          <td><span class="order-total">$${order.total.toFixed(2)}</span></td>
+          <td><span class="order-date">${fmtDate(order.createdAt)}</span></td>
+          <td><div class="actions">${actions}</div></td>
+        </tr>
+      `;
+    }).join('');
+
+    // action listeners
+    tbody.querySelectorAll('.action-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleAction(btn.dataset.ref, btn.dataset.action));
+    });
+  }
+
+  // ── ORDER ACTIONS ──────────────────────────────────────────────
+  function handleAction(ref, action) {
+    const orders = getOrders();
+    const idx = orders.findIndex(o => o.ref === ref);
+    if (idx === -1) return;
+
+    if (action === 'xaqiiji') {
+      orders[idx].status = 'Xaqiijisan';
+    } else if (action === 'ladiro') {
+      orders[idx].status = 'La Diro';
+    } else if (action === 'quftay') {
+      if (!confirm(`Dalabka ${ref} quus miyaad dooneysaa?`)) return;
+      orders[idx].status = 'Quftay';
+    } else if (action === 'detail') {
+      showDetail(orders[idx]);
+      return;
+    }
+
+    saveOrders(orders);
+    render();
+  }
+
+  // ── DETAIL PANEL ───────────────────────────────────────────────
+  function showDetail(order) {
+    document.getElementById('detailTitle').textContent = 'Dalabka: ' + order.ref;
+    const badgeClass = STATUS_MAP[order.status] || '';
+
+    document.getElementById('detailContent').innerHTML = `
+      <div class="detail-section">
+        <div class="detail-section-label">Xaaladda</div>
+        <span class="status-badge ${badgeClass}">${order.status}</span>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-label">Macmiilka</div>
+        <div class="detail-row"><span class="label">Magaca</span><span>${order.customer.name}</span></div>
+        <div class="detail-row"><span class="label">Telefoon</span><span>${order.customer.phone}</span></div>
+        <div class="detail-row"><span class="label">Cinwaan</span><span>${order.customer.address}</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-label">Alaabta</div>
+        ${order.items.map(i => `
+          <div class="detail-row">
+            <span class="label">${i.icon} ${i.name} ×${i.qty}</span>
+            <span>$${(i.price * i.qty).toFixed(2)}</span>
+          </div>
+        `).join('')}
+        <div class="detail-row detail-total">
+          <span>Wadarta</span>
+          <span>$${order.total.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-label">Macluumaad</div>
+        <div class="detail-row"><span class="label">Taariikhda</span><span>${fmtDate(order.createdAt)}</span></div>
+        <div class="detail-row"><span class="label">Lacag Bixin</span><span>${order.paymentMethod}</span></div>
+      </div>
+    `;
+
+    document.getElementById('detailOverlay').style.display = 'flex';
+  }
+
+  document.getElementById('detailClose').addEventListener('click', () => {
+    document.getElementById('detailOverlay').style.display = 'none';
+  });
+  document.getElementById('detailOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('detailOverlay'))
+      document.getElementById('detailOverlay').style.display = 'none';
+  });
+
+  // ── FILTER TABS ────────────────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentFilter = tab.dataset.status;
+      renderOrders();
+    });
+  });
+
+  // ── SETTINGS ──────────────────────────────────────────────────
+  const MERCHANT_KEY = 'sz_evc_merchant';
+  const PWD_KEY = 'sz_admin_pwd';
+
+  function loadSettings() {
+    document.getElementById('settingMerchant').value = localStorage.getItem(MERCHANT_KEY) || '';
+  }
+
+  document.getElementById('saveMerchant').addEventListener('click', () => {
+    const val = document.getElementById('settingMerchant').value.trim();
+    localStorage.setItem(MERCHANT_KEY, val);
+    const ok = document.getElementById('merchantOk');
+    ok.style.display = 'block';
+    setTimeout(() => ok.style.display = 'none', 2000);
+  });
+
+  document.getElementById('savePwd').addEventListener('click', () => {
+    const val = document.getElementById('settingPwd').value.trim();
+    if (!val) return;
+    localStorage.setItem(PWD_KEY, val);
+    document.getElementById('settingPwd').value = '';
+    const ok = document.getElementById('pwdOk');
+    ok.style.display = 'block';
+    setTimeout(() => ok.style.display = 'none', 2000);
+  });
+
+  // ── SEED DEMO DATA (first time only) ──────────────────────────
+  function seedDemo() {
+    if (localStorage.getItem('sz_seeded')) return;
+    const demo = [
+      {
+        ref: 'SZ-DEMO01',
+        status: 'Sugaya Xaqiijin',
+        customer: { name: 'Axmed Cali', phone: '0615001234', address: 'KM4, Wadada Afgooye, Muqdisho' },
+        items: [{ id:'p001', name:'Pro Sprint Boot', price:45, icon:'⚽', qty:1 },
+                { id:'p007', name:'Performance Tee', price:18, icon:'👕', qty:2 }],
+        total: 81,
+        createdAt: new Date(Date.now() - 3600000).toISOString(),
+        paymentMethod: 'EVC Plus'
+      },
+      {
+        ref: 'SZ-DEMO02',
+        status: 'Xaqiijisan',
+        customer: { name: 'Xaliimo Muuse', phone: '0617889900', address: 'Hamar-Weyne, Muqdisho' },
+        items: [{ id:'p003', name:'Ultra Runner X', price:55, icon:'🏃', qty:1 }],
+        total: 55,
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        paymentMethod: 'EVC Plus'
+      },
+      {
+        ref: 'SZ-DEMO03',
+        status: 'La Diro',
+        customer: { name: 'Cabdullahi Ibraahim', phone: '0619112233', address: 'Hodan, Muqdisho' },
+        items: [{ id:'p005', name:'Court King', price:70, icon:'🏀', qty:1 },
+                { id:'p010', name:'Grip Socks Pro', price:12, icon:'🧦', qty:3 }],
+        total: 106,
+        createdAt: new Date(Date.now() - 172800000).toISOString(),
+        paymentMethod: 'EVC Plus'
+      }
+    ];
+    localStorage.setItem('sz_orders', JSON.stringify(demo));
+    localStorage.setItem('sz_seeded', '1');
+  }
+
+  // ── RENDER ─────────────────────────────────────────────────────
+  function render() {
+    renderStats();
+    renderOrders();
+  }
+
+  seedDemo();
+  loadSettings();
+  render();
+
+  // Auto-refresh every 30s for new orders
+  setInterval(render, 30000);
+
+  // ═══════════════════════ PRODUCTS MANAGEMENT ═══════════════════════
+
+  // ── SECTION SWITCHING ──────────────────────────────────────────
+  const ordersSection = document.getElementById('ordersSection');
+  const productsSection = document.getElementById('productsSection');
+  const switchOrders = document.getElementById('switchOrders');
+  const switchProducts = document.getElementById('switchProducts');
+
+  function showSection(name) {
+    if (name === 'products') {
+      ordersSection.style.display = 'none';
+      productsSection.style.display = 'block';
+      switchOrders.classList.remove('active');
+      switchProducts.classList.add('active');
+      renderAdminProducts();
+      updateStorageGauge();
+    } else {
+      productsSection.style.display = 'none';
+      ordersSection.style.display = 'block';
+      switchProducts.classList.remove('active');
+      switchOrders.classList.add('active');
+    }
+  }
+  switchOrders.addEventListener('click', () => showSection('orders'));
+  switchProducts.addEventListener('click', () => showSection('products'));
+
+  // ── PRODUCT CATEGORY FILTER (admin grid) ───────────────────────
+  let productCatFilter = 'all';
+  document.querySelectorAll('#productCatTabs .tab-btn').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#productCatTabs .tab-btn').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      productCatFilter = tab.dataset.pcat;
+      renderAdminProducts();
+    });
+  });
+
+  // ── RENDER ADMIN PRODUCTS GRID ──────────────────────────────────
+  function renderAdminProducts() {
+    const all = getProducts();
+    const items = productCatFilter === 'all' ? all : all.filter(p => p.category === productCatFilter);
+    const grid = document.getElementById('adminProductsGrid');
+
+    if (items.length === 0) {
+      grid.innerHTML = `<div class="empty-products">📭 Alaab lagama helin. Dhagso "Alaab Cusub Ku Dar" si aad u bilowdo.</div>`;
+      return;
+    }
+
+    grid.innerHTML = items.map(p => `
+      <div class="admin-product-card">
+        <div class="admin-product-img">
+          ${p.image ? `<img src="${p.image}" alt="${p.name}" />` : `<span class="placeholder-icon">${p.icon || '🏷️'}</span>`}
+        </div>
+        <div class="admin-product-body">
+          <div class="admin-product-cat">${p.categoryLabel}</div>
+          <div class="admin-product-name">${p.name}</div>
+          <div class="admin-product-price">$${Number(p.price).toFixed(2)}</div>
+          <div class="admin-product-actions">
+            <button class="btn-edit-product" data-id="${p.id}">✎ Wax Ka Beddel</button>
+            <button class="btn-delete-product" data-id="${p.id}">🗑 Tirtir</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.btn-edit-product').forEach(btn => {
+      btn.addEventListener('click', () => openProductModal(btn.dataset.id));
+    });
+    grid.querySelectorAll('.btn-delete-product').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const product = getProducts().find(p => p.id === btn.dataset.id);
+        if (!product) return;
+        if (!confirm(`Ma hubtaa inaad tirtirto "${product.name}"? Tallaabadan lama soo celin karo.`)) return;
+        deleteProduct(btn.dataset.id);
+        renderAdminProducts();
+        updateStorageGauge();
+      });
+    });
+  }
+
+  // ── STORAGE GAUGE ───────────────────────────────────────────────
+  // Rough estimate of total localStorage usage vs typical ~5MB browser cap.
+  const STORAGE_CAP_BYTES = 5 * 1024 * 1024;
+
+  function getLocalStorageBytes() {
+    let total = 0;
+    for (const key in localStorage) {
+      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
+        total += (localStorage[key].length + key.length) * 2; // UTF-16 ≈ 2 bytes/char
+      }
+    }
+    return total;
+  }
+
+  function updateStorageGauge() {
+    const used = getLocalStorageBytes();
+    const pct = Math.min(100, Math.round((used / STORAGE_CAP_BYTES) * 100));
+    const fill = document.getElementById('storageGaugeFill');
+    const text = document.getElementById('storageGaugeText');
+    fill.style.width = pct + '%';
+    fill.classList.remove('warn', 'danger');
+    if (pct > 85) fill.classList.add('danger');
+    else if (pct > 60) fill.classList.add('warn');
+    text.textContent = pct + '%  (' + (used / 1024).toFixed(0) + ' KB)';
+  }
+
+  // ── IMAGE COMPRESSION ────────────────────────────────────────────
+  // Resizes + re-encodes as JPEG so photos stay small enough for localStorage.
+  function compressImage(file, maxDim = 800, quality = 0.72) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > height && width > maxDim) {
+            height = Math.round(height * (maxDim / width));
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round(width * (maxDim / height));
+            height = maxDim;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── PRODUCT FORM MODAL ───────────────────────────────────────────
+  const productModalOverlay = document.getElementById('productModalOverlay');
+  const productForm = document.getElementById('productForm');
+  const imageDrop = document.getElementById('imageDrop');
+  const pfImageInput = document.getElementById('pfImageInput');
+  const imagePreview = document.getElementById('imagePreview');
+  const imageDropText = document.getElementById('imageDropText');
+  const removeImageBtn = document.getElementById('removeImageBtn');
+  const pfError = document.getElementById('pfError');
+
+  let currentImageData = '';
+  let editingProductId = null;
+
+  function openProductModal(id) {
+    pfError.style.display = 'none';
+    productForm.reset();
+    currentImageData = '';
+    imagePreview.style.display = 'none';
+    imageDropText.style.display = 'block';
+    removeImageBtn.style.display = 'none';
+    editingProductId = id || null;
+
+    if (id) {
+      const product = getProducts().find(p => p.id === id);
+      if (!product) return;
+      document.getElementById('productModalTitle').textContent = 'Wax Ka Beddel: ' + product.name;
+      document.getElementById('pfId').value = product.id;
+      document.getElementById('pfName').value = product.name;
+      document.getElementById('pfCategory').value = product.category;
+      document.getElementById('pfPrice').value = product.price;
+      document.getElementById('pfDescription').value = product.description || '';
+      document.getElementById('pfSubmitBtn').textContent = 'Isbeddelka Kaydi';
+      if (product.image) {
+        currentImageData = product.image;
+        imagePreview.src = product.image;
+        imagePreview.style.display = 'block';
+        imageDropText.style.display = 'none';
+        removeImageBtn.style.display = 'inline-block';
+      }
+    } else {
+      document.getElementById('productModalTitle').textContent = 'Alaab Cusub Ku Dar';
+      document.getElementById('pfSubmitBtn').textContent = 'Alaabta Kaydi';
+    }
+
+    productModalOverlay.style.display = 'flex';
+  }
+
+  function closeProductModal() {
+    productModalOverlay.style.display = 'none';
+  }
+
+  document.getElementById('openAddProduct').addEventListener('click', () => openProductModal(null));
+  document.getElementById('productModalClose').addEventListener('click', closeProductModal);
+  productModalOverlay.addEventListener('click', e => {
+    if (e.target === productModalOverlay) closeProductModal();
+  });
+
+  imageDrop.addEventListener('click', () => pfImageInput.click());
+
+  pfImageInput.addEventListener('change', async () => {
+    const file = pfImageInput.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      pfError.textContent = 'Fadlan dooro fayl sawir ah (JPG ama PNG).';
+      pfError.style.display = 'block';
+      return;
+    }
+    pfError.style.display = 'none';
+    imageDropText.textContent = '⏳ Sawirka waa la yareynayaa...';
+    try {
+      const compressed = await compressImage(file);
+      currentImageData = compressed;
+      imagePreview.src = compressed;
+      imagePreview.style.display = 'block';
+      imageDropText.style.display = 'none';
+      removeImageBtn.style.display = 'inline-block';
+    } catch (err) {
+      pfError.textContent = 'Sawirka lama soo gelin karin. Isku day sawir kale.';
+      pfError.style.display = 'block';
+    }
+  });
+
+  removeImageBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    currentImageData = '';
+    pfImageInput.value = '';
+    imagePreview.style.display = 'none';
+    imageDropText.style.display = 'block';
+    imageDropText.innerHTML = '📷 Dhagso si aad sawir u soo gelliso<br/><small>JPG/PNG — waa la yareynayaa si ay si fudud u keydsamaan</small>';
+    removeImageBtn.style.display = 'none';
+  });
+
+  productForm.addEventListener('submit', e => {
+    e.preventDefault();
+    pfError.style.display = 'none';
+
+    const name = document.getElementById('pfName').value.trim();
+    const category = document.getElementById('pfCategory').value;
+    const price = parseFloat(document.getElementById('pfPrice').value);
+    const description = document.getElementById('pfDescription').value.trim();
+
+    if (!name || !category || isNaN(price) || price < 0) {
+      pfError.textContent = 'Fadlan buuxi dhammaan goobaha si sax ah (magaca, qaybta, qiimaha).';
+      pfError.style.display = 'block';
+      return;
+    }
+
+    // Warn (but don't block) if storage is getting full and a new image is being added
+    const projectedBytes = getLocalStorageBytes() + (currentImageData ? currentImageData.length : 0);
+    if (projectedBytes > STORAGE_CAP_BYTES * 0.95) {
+      const proceed = confirm('Digniin: Bakhaarka browser-ka wuxuu ku dhowyahay buuxsamaha. Haddii aad sii wadato, alaabta cusub laga yaabaa inaysan si sax ah u keydsami doonin. Ma sii wadaa?');
+      if (!proceed) return;
+    }
+
+    const data = {
+      name,
+      category,
+      price,
+      description,
+      icon: { 'kubadda-cagta': '⚽', 'orinta': '🏃', 'koleyga': '🏀', 'dharka': '👕' }[category] || '🏷️',
+      image: currentImageData
+    };
+
+    try {
+      if (editingProductId) {
+        updateProduct(editingProductId, data);
+      } else {
+        addProduct(data);
+      }
+    } catch (err) {
+      pfError.textContent = 'Khalad ayaa dhacay marka la kaydinayay. Bakhaarka browser-ku waa buuxsamay — tirtir sawirro qaar.';
+      pfError.style.display = 'block';
+      return;
+    }
+
+    closeProductModal();
+    renderAdminProducts();
+    updateStorageGauge();
+  });
+
+</script>
+</body>
+</html>
